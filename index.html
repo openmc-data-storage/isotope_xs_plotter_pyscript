@@ -10,6 +10,8 @@
 
     <py-env>
         - plotly
+        - paths:
+            - src/plot.py
     </py-env>
 </head>
 
@@ -31,16 +33,29 @@
 
     <py-script>
         import js
+        from plot import plot
         import json
         import plotly
         import plotly.graph_objects as go
+        
+        from pyodide.http import pyfetch, FetchResponse
+        from typing import Optional, Any
+        from js import console
+        import asyncio
+        import js
 
-        def plot():
-            fig = go.Figure(data=go.Scatter(x=[1,2,3,4], y=[1,2,1,4]))
-            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            js.plot(graphJSON,"my_chart")
+        url = 'https://openmc-data-storage.github.io/isotope_xs_plotter_pyscript/src/li6_205.json'
 
-        plot()
+        response = await pyfetch(url= url, method="GET")
+        data =  await response.json()
+
+        print(data)
+
+        fig = go.Figure(data=go.Scatter(x=data['energy'], y=data['xs']))
+        graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        js.plot(graphJSON,"my_chart")
+
+
     </py-script>
 </body>
 
